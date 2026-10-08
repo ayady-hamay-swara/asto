@@ -1,0 +1,19 @@
+# Ignore everything in the root
+/*
+
+# Whitelist frontend folders only
+!/public
+!/resources
+
+# Keep this file itself
+!/.gitignore
+
+# Ignore generated files inside the whitelisted folders
+/public/hot
+/public/storage
+/public/build
+/public/fonts-manifest.dev.json
+
+# OS junk
+.DS_Store
+Thumbs.db
