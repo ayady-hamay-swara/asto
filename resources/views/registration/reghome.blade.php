@@ -15,8 +15,8 @@
                     <i class='bx bx-search-alt-2'></i> <input type="text " placeholder="Search">
                 </div>
                 <div class="dark_mode_icon" onclick="darkMode()">
-                    <i class='bx bx-moon'></i>
-                    <i class='bx bx-sun'></i>
+                    <i class='bx bx-moon'> </i>
+                    <i class='bx bx-sun'> </i>
                 </div>
             </div>
             <div class="menu_item_name_and_filter ">

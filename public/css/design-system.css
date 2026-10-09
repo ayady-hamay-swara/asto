@@ -1,0 +1,181 @@
+/* design-system.css — tokens + shared pieces. Values come from the original table.css. */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", "Noto Sans Arabic", sans-serif;
+}
+
+:root {
+    --grey-color: #b1adad;      /* icons — not for text on white */
+    --border-color: #e7e8ea;    /* chips, inputs, dividers */
+    --accent: #5bb9c0;          /* teal: primary button */
+    --accent-strong: #2f8f97;   /* teal dark enough for focus rings (3:1 on white) */
+    --accent-soft: #f1f8f8;     /* zebra rows, menu hover */
+    --accent-hover: #e3f3f4;
+    --text: #000;
+    --text-muted: #5f6368;      /* readable grey for secondary text */
+    --danger-bg: #fdecea;
+    --danger-text: #8a1f17;
+    --radius: 5px;
+}
+
+body {
+    color: var(--text);
+    background: #fff;
+}
+
+.container {
+    min-height: 100vh;
+    letter-spacing: 1px;
+}
+
+/* Arabic-script letters join; letter-spacing would break them apart */
+html[dir="rtl"] .container {
+    letter-spacing: 0;
+}
+
+.main_content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px 24px 40px;
+    max-width: 1400px;
+    min-height: 100vh;
+    margin-inline: auto;
+}
+
+.sr_only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent-strong);
+    outline-offset: 2px;
+}
+
+/*----- Icons -----*/
+
+.icon {
+    flex-shrink: 0;
+}
+
+html[dir="rtl"] .icon_flip {
+    transform: scaleX(-1);
+}
+
+/*----- Page header + the two buttons -----*/
+
+.page_head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.page_head_end {
+    justify-content: flex-end;
+}
+
+.page_actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* same grey chip as the old Sort / Filter buttons */
+.chip_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 5px 14px;
+    background: var(--border-color);
+    color: var(--text);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .15s ease-in-out;
+}
+
+.chip_btn:hover {
+    background: #dcdde0;
+}
+
+/*----- Language select -----*/
+
+.lang_switch {
+    position: relative;
+}
+
+.lang_menu {
+    position: absolute;
+    inset-block-start: calc(100% + 6px);
+    inset-inline-end: 0;
+    z-index: 10;
+    min-width: 170px;
+    padding: 6px;
+    list-style: none;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.lang_menu[hidden] {
+    display: none;
+}
+
+.lang_option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    text-align: start;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.lang_option:hover,
+.lang_option:focus-visible {
+    background: var(--accent-soft);
+}
+
+.lang_option .icon {
+    visibility: hidden;
+    color: var(--accent-strong);
+}
+
+.lang_option[aria-checked="true"] {
+    font-weight: 600;
+}
+
+.lang_option[aria-checked="true"] .icon {
+    visibility: visible;
+}
+
+@media (max-width: 500px) {
+    .main_content {
+        padding: 16px 16px 32px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}

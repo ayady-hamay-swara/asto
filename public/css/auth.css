@@ -1,0 +1,66 @@
+/* auth.css — login screen */
+
+.auth_card {
+    margin: auto;
+    width: min(360px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 60px;
+}
+
+.auth_card .brand {
+    font-weight: 600;
+    font-size: 32px;
+    font-style: italic;
+}
+
+.auth_form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field label {
+    font-size: 14px;
+}
+
+.field input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    color: var(--text);
+    background: var(--border-color);
+    border: none;
+    border-radius: var(--radius);
+}
+
+.primary_btn {
+    min-height: 44px;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+.primary_btn:hover {
+    filter: brightness(0.95);
+}
+
+.form_error {
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    border-radius: var(--radius);
+}
