@@ -10,7 +10,7 @@
             @include('partials.icon', ['name' => 'chevron'])
         </button>
         <ul id="lang_menu" class="lang_menu" role="menu" hidden>
-            @foreach ([['ku', 'ckb', 'کوردی'], ['en', 'en', 'English'], ['ar', 'ar', 'العربية']] as [$code, $htmlLang, $name])
+            @foreach ([['ku', 'ckb', 'کوردی'], ['en', 'en', 'English']] as [$code, $htmlLang, $name])
                 <li role="none">
                     <button type="button" class="lang_option" role="menuitemradio"
                             aria-checked="{{ $code === 'ku' ? 'true' : 'false' }}"

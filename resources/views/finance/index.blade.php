@@ -7,50 +7,115 @@
     <link rel="stylesheet" href="{{ asset('css/data-page.css') }}">
 @endpush
 
+@push('scripts')
+    <script src="{{ asset('js/table-tools.js') }}"></script>
+    <script>
+        // Handle clearance toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.clearance-toggle').forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    const studentId = this.dataset.studentId;
+                    const area = this.dataset.area;
+                    const status = this.checked;
+
+                    fetch('/api/clearance/update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            student_id: studentId,
+                            area: area,
+                            status: status
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            // Revert checkbox on error
+                            this.checked = !status;
+                            alert('Error updating clearance: ' + (data.error || 'Unknown error'));
+                        }
+                    })
+                    .catch(error => {
+                        this.checked = !status;
+                        console.error('Error:', error);
+                    });
+                });
+            });
+        });
+    </script>
+@endpush
+
 @section('content')
-    {{-- Starting point: the student columns. Change the columns freely, this table belongs to finance only. --}}
+    {{-- FINANCE page. Student columns + finance clearance from department database. --}}
+    @php
+        $filters = [
+            ['key' => 'college',    'label_key' => 'col_college',    'label' => 'کۆلێژ'],
+            ['key' => 'department', 'label_key' => 'col_department', 'label' => 'بەش'],
+            ['key' => 'stage',      'label_key' => 'col_stage',      'label' => 'قۆناغ'],
+            ['key' => 'parallel',   'label_key' => 'col_parallel',   'label' => 'پاراڵێل', 'kind' => 'bool'],
+            ['key' => 'finance_cleared', 'label_key' => 'col_finance_cleared', 'label' => 'دارایی', 'kind' => 'bool'],
+        ];
+        $clearanceArea = $clearanceArea ?? 'finance';
+        $canModify = in_array($admin->role ?? '', ['finance officer', 'chairman', 'assistant head']);
+    @endphp
+
     @include('partials.page-header', ['area' => 'finance'])
 
-    <div class="table">
-        <table>
-            <thead>
-                <tr>
-                    <th scope="col" data-i18n="col_name">ناو</th>
-                    <th scope="col" data-i18n="col_id">ژمارە</th>
-                    <th scope="col" data-i18n="col_college">کۆلێژ</th>
-                    <th scope="col" data-i18n="col_department">بەش</th>
-                    <th scope="col" data-i18n="col_stage">قۆناغ</th>
-                    <th scope="col" data-i18n="col_gender">ڕەگەز</th>
-                    <th scope="col" data-i18n="col_email">ئیمەیل</th>
-                    <th scope="col" data-i18n="col_phone">مۆبایل</th>
-                    <th scope="col" data-i18n="col_parallel">پاراڵێل</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($students as $student)
+    <section class="table_tools" data-table-tools>
+        @include('partials.table-toolbar', ['filters' => $filters])
+
+        <div class="table">
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ $student->name }}</td>
-                        <td><bdi dir="ltr">{{ $student->id }}</bdi></td>
-                        <td>{{ $student->college }}</td>
-                        <td>{{ $student->department }}</td>
-                        <td>{{ $student->stage }}</td>
-                        <td>@include('partials.cells.gender', ['value' => $student->gender])</td>
-                        <td><bdi dir="ltr">{{ $student->email }}</bdi></td>
-                        <td><bdi dir="ltr">{{ $student->phone_number }}</bdi></td>
-                        <td>
-                            @if ($student->parallel)
-                                <span data-i18n="yes">بەڵێ</span>
-                            @else
-                                <span data-i18n="no">نەخێر</span>
-                            @endif
-                        </td>
+                        @include('partials.th', ['type' => 'number', 'i18n' => 'col_id', 'label' => 'ژمارە'])
+                        @include('partials.th', ['type' => 'text', 'i18n' => 'col_name', 'label' => 'ناو'])
+                        @include('partials.th', ['type' => 'text', 'i18n' => 'col_college', 'label' => 'کۆلێژ'])
+                        @include('partials.th', ['type' => 'text', 'i18n' => 'col_department', 'label' => 'بەش'])
+                        @include('partials.th', ['type' => 'number', 'i18n' => 'col_stage', 'label' => 'قۆناغ'])
+                        @include('partials.th', ['type' => 'text', 'i18n' => 'col_gender', 'label' => 'ڕەگەز'])
+                        @include('partials.th', ['type' => 'text', 'i18n' => 'col_email', 'label' => 'ئیمەیل'])
+                        @include('partials.th', ['type' => 'text', 'i18n' => 'col_phone', 'label' => 'مۆبایل'])
+                        @include('partials.th', ['type' => 'bool', 'i18n' => 'col_parallel', 'label' => 'پاراڵێل'])
+                        @include('partials.th', ['type' => 'bool', 'i18n' => 'col_finance_cleared', 'label' => 'دارایی'])
                     </tr>
-                @empty
-                    <tr class="empty_row">
-                        <td colspan="9" data-i18n="students_empty">هیچ خوێندکارێک نەدۆزرایەوە.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @forelse ($students as $student)
+                        @php
+                            $clearance = $clearances->get($student->id);
+                            $isCleared = $clearance ? $clearance->finance_cleared : true;
+                            $studentDept = $student->department;
+                            $isOwnDept = $studentDept === ($admin->department ?? '');
+                        @endphp
+                        <tr data-college="{{ $student->college }}" data-department="{{ $student->department }}" data-stage="{{ $student->stage }}" data-parallel="{{ (int) $student->parallel }}" data-finance-cleared="{{ (int) $isCleared }}">
+                            <td><bdi dir="ltr">{{ $student->id }}</bdi></td>
+                            <td>{{ $student->name }}</td>
+                            <td>{{ $student->college }}</td>
+                            <td>{{ $student->department }}</td>
+                            <td>{{ $student->stage }}</td>
+                            <td>@include('partials.cells.gender', ['value' => $student->gender])</td>
+                            <td><bdi dir="ltr">{{ $student->email }}</bdi></td>
+                            <td><bdi dir="ltr">{{ $student->phone_number }}</bdi></td>
+                            <td>@include('partials.cells.bool', ['value' => $student->parallel])</td>
+                            <td>
+                                @if ($canModify && $isOwnDept)
+                                    <input type="checkbox" class="clearance-toggle" data-student-id="{{ $student->id }}" data-area="finance" {{ $isCleared ? 'checked' : '' }}>
+                                @else
+                                    @include('partials.cells.bool', ['value' => $isCleared])
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr class="empty_row">
+                            <td colspan="10" data-i18n="students_empty">هیچ خوێندکارێک نەدۆزرایەوە.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
 @endsection

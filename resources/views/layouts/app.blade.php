@@ -10,7 +10,7 @@
     <script>
         (function () {
             try {
-                var map = { ku: ['ckb', 'rtl'], en: ['en', 'ltr'], ar: ['ar', 'rtl'] };
+                var map = { ku: ['ckb', 'rtl'], en: ['en', 'ltr'] };
                 var m = map[localStorage.getItem('asto_lang')] || map.ku;
                 document.documentElement.lang = m[0];
                 document.documentElement.dir = m[1];
@@ -20,6 +20,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {{-- Noto Sans Arabic is kept on purpose: Kurdish (Sorani) is written in Arabic script --}}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600&family=Poppins:ital,wght@0,400;0,500;0,600;1,600&display=swap">
 
     {{-- Load order: design-system → page css --}}

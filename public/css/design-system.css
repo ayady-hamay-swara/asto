@@ -14,6 +14,7 @@
     --accent-strong: #2f8f97;   /* teal dark enough for focus rings (3:1 on white) */
     --accent-soft: #f1f8f8;     /* zebra rows, menu hover */
     --accent-hover: #e3f3f4;
+    --box-border: #80868b;      /* checkbox outline: 3:1 against white */
     --text: #000;
     --text-muted: #5f6368;      /* readable grey for secondary text */
     --danger-bg: #fdecea;
