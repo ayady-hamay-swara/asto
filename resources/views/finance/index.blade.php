@@ -9,57 +9,18 @@
 
 @push('scripts')
     <script src="{{ asset('js/table-tools.js') }}"></script>
-    <script>
-        // Handle clearance toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.clearance-toggle').forEach(function(checkbox) {
-                checkbox.addEventListener('change', function() {
-                    const studentId = this.dataset.studentId;
-                    const area = this.dataset.area;
-                    const status = this.checked;
-
-                    fetch('/api/clearance/update', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            student_id: studentId,
-                            area: area,
-                            status: status
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.success) {
-                            // Revert checkbox on error
-                            this.checked = !status;
-                            alert('Error updating clearance: ' + (data.error || 'Unknown error'));
-                        }
-                    })
-                    .catch(error => {
-                        this.checked = !status;
-                        console.error('Error:', error);
-                    });
-                });
-            });
-        });
-    </script>
 @endpush
 
 @section('content')
-    {{-- FINANCE page. Student columns + finance clearance from department database. --}}
+    {{-- FINANCE page. Student columns + the finance record (tuition_fee, discount_percentage, fee_after_discount, paid_amount, remaining_amount) + this area's clearance (cleared = finished this area's clearance project). Change freely: this table belongs to finance only. --}}
     @php
         $filters = [
             ['key' => 'college',    'label_key' => 'col_college',    'label' => 'کۆلێژ'],
             ['key' => 'department', 'label_key' => 'col_department', 'label' => 'بەش'],
             ['key' => 'stage',      'label_key' => 'col_stage',      'label' => 'قۆناغ'],
             ['key' => 'parallel',   'label_key' => 'col_parallel',   'label' => 'پاراڵێل', 'kind' => 'bool'],
-            ['key' => 'finance_cleared', 'label_key' => 'col_finance_cleared', 'label' => 'دارایی', 'kind' => 'bool'],
+            ['key' => 'cleared',    'label_key' => 'col_cleared',    'label' => 'بەرائەت',  'kind' => 'bool'],
         ];
-        $clearanceArea = $clearanceArea ?? 'finance';
-        $canModify = in_array($admin->role ?? '', ['finance officer', 'chairman', 'assistant head']);
     @endphp
 
     @include('partials.page-header', ['area' => 'finance'])
@@ -80,18 +41,17 @@
                         @include('partials.th', ['type' => 'text', 'i18n' => 'col_email', 'label' => 'ئیمەیل'])
                         @include('partials.th', ['type' => 'text', 'i18n' => 'col_phone', 'label' => 'مۆبایل'])
                         @include('partials.th', ['type' => 'bool', 'i18n' => 'col_parallel', 'label' => 'پاراڵێل'])
-                        @include('partials.th', ['type' => 'bool', 'i18n' => 'col_finance_cleared', 'label' => 'دارایی'])
+                        @include('partials.th', ['type' => 'number', 'i18n' => 'fin_tuition_fee', 'label' => 'کرێی خوێندن'])
+                        @include('partials.th', ['type' => 'number', 'i18n' => 'fin_discount', 'label' => 'ڕێژەی داشکاندن'])
+                        @include('partials.th', ['type' => 'number', 'i18n' => 'fin_fee_after_discount', 'label' => 'کرێی دوای داشکاندن'])
+                        @include('partials.th', ['type' => 'number', 'i18n' => 'fin_paid', 'label' => 'بڕی دراو'])
+                        @include('partials.th', ['type' => 'number', 'i18n' => 'fin_remaining', 'label' => 'بڕی ماوە'])
+                        @include('partials.th', ['type' => 'bool', 'i18n' => 'col_cleared', 'label' => 'بەرائەت'])
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($students as $student)
-                        @php
-                            $clearance = $clearances->get($student->id);
-                            $isCleared = $clearance ? $clearance->finance_cleared : true;
-                            $studentDept = $student->department;
-                            $isOwnDept = $studentDept === ($admin->department ?? '');
-                        @endphp
-                        <tr data-college="{{ $student->college }}" data-department="{{ $student->department }}" data-stage="{{ $student->stage }}" data-parallel="{{ (int) $student->parallel }}" data-finance-cleared="{{ (int) $isCleared }}">
+                        <tr data-college="{{ $student->college }}" data-department="{{ $student->department }}" data-stage="{{ $student->stage }}" data-parallel="{{ (int) $student->parallel }}" data-cleared="{{ (int) $student->cleared }}">
                             <td><bdi dir="ltr">{{ $student->id }}</bdi></td>
                             <td>{{ $student->name }}</td>
                             <td>{{ $student->college }}</td>
@@ -101,17 +61,16 @@
                             <td><bdi dir="ltr">{{ $student->email }}</bdi></td>
                             <td><bdi dir="ltr">{{ $student->phone_number }}</bdi></td>
                             <td>@include('partials.cells.bool', ['value' => $student->parallel])</td>
-                            <td>
-                                @if ($canModify && $isOwnDept)
-                                    <input type="checkbox" class="clearance-toggle" data-student-id="{{ $student->id }}" data-area="finance" {{ $isCleared ? 'checked' : '' }}>
-                                @else
-                                    @include('partials.cells.bool', ['value' => $isCleared])
-                                @endif
-                            </td>
+                            <td>@include('partials.cells.money', ['value' => $student->finance?->tuition_fee ?? 0])</td>
+                            <td>@include('partials.cells.percent', ['value' => $student->finance?->discount_percentage ?? 0])</td>
+                            <td>@include('partials.cells.money', ['value' => $student->finance?->fee_after_discount ?? 0])</td>
+                            <td>@include('partials.cells.money', ['value' => $student->finance?->paid_amount ?? 0])</td>
+                            <td>@include('partials.cells.money', ['value' => $student->finance?->remaining_amount ?? 0])</td>
+                            <td>@include('partials.cells.bool', ['value' => $student->cleared])</td>
                         </tr>
                     @empty
                         <tr class="empty_row">
-                            <td colspan="10" data-i18n="students_empty">هیچ خوێندکارێک نەدۆزرایەوە.</td>
+                            <td colspan="15" data-i18n="students_empty">هیچ خوێندکارێک نەدۆزرایەوە.</td>
                         </tr>
                     @endforelse
                 </tbody>

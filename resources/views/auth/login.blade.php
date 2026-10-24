@@ -13,7 +13,7 @@
     </div>
 
     <section class="auth_card">
-        <h1 class="brand">School</h1>
+       <img src="{{ asset('img/logo/uos.png') }}" alt="University Logo" class="brand_logo" style="width: 50px"><h1 class="brand">University of sulaymani</h1>
 
         @if ($errors->any())
             <p class="form_error" role="alert" data-i18n="login_error">ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە.</p>
